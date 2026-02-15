@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+dist/
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated output (keep examples clean)
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# Playwright
+.playwright-mcp/
+
+# IDE
+.vscode/
+.idea/
