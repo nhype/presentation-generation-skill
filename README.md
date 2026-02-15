@@ -1,6 +1,8 @@
-# Presentation Generation Skill for Claude Code
+# Presentation Generation Skill
 
-A Claude Code skill that generates professional HTML and PDF presentations from markdown content, URLs, or topic descriptions. It creates visually stunning slides with AI-generated illustrations, keyboard navigation, and automatic PDF export.
+An [Agent Skill](https://agentskills.io) that generates professional HTML and PDF presentations from markdown content, URLs, or topic descriptions. It creates visually stunning slides with AI-generated illustrations, keyboard navigation, and automatic PDF export.
+
+Works with **Claude Code**, **Cursor**, and **OpenClaw** — any AI coding agent that supports the SKILL.md format.
 
 ## Features
 
@@ -13,7 +15,6 @@ A Claude Code skill that generates professional HTML and PDF presentations from 
 
 ## Prerequisites
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
 - [Node.js](https://nodejs.org/) 18+ (for the MCP server)
 - [Python 3](https://www.python.org/) + [Pillow](https://pillow.readthedocs.io/) (for PDF export)
 - [OpenAI API key](https://platform.openai.com/api-keys) (for image generation)
@@ -21,34 +22,25 @@ A Claude Code skill that generates professional HTML and PDF presentations from 
 
 ## Installation
 
-### Option 1: Clone and copy (recommended)
+### 1. Clone the repository
 
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/presentation-generation-skill.git
-
-# Copy the skill to your project
-cp -r presentation-generation-skill/skills/generate-presentation YOUR_PROJECT/.claude/skills/
+git clone https://github.com/nhype/presentation-generation-skill.git
 ```
 
-### Option 2: Personal skill (available in all projects)
-
-```bash
-cp -r presentation-generation-skill/skills/generate-presentation ~/.claude/skills/
-```
-
-### Set up the MCP server
+### 2. Build the MCP server
 
 The skill requires the OpenAI GPT Image MCP server for generating slide illustrations.
 
 ```bash
-# Build the MCP server
 cd presentation-generation-skill/mcp-servers/openai-gpt-image
 npm install
 npm run build
 ```
 
-Add to your project's `.mcp.json` (create if it doesn't exist):
+### 3. Configure the MCP server
+
+Add to your project's MCP config file (`.mcp.json` for Claude Code / Cursor, or `openclaw.json` for OpenClaw):
 
 ```json
 {
@@ -71,28 +63,144 @@ Create a `.env` file with your OpenAI API key:
 OPENAI_API_KEY=sk-your-key-here
 ```
 
-### Install Python dependency
+### 4. Install Python dependency
 
 ```bash
 pip install Pillow
 ```
 
-## Usage
+### 5. Install the skill for your agent
 
-In Claude Code, run:
+Pick the section that matches your AI coding agent:
+
+---
+
+#### Claude Code
+
+**Project-level** (this project only):
+
+```bash
+cp -r skills/generate-presentation YOUR_PROJECT/.claude/skills/
+```
+
+**Personal** (available in all your projects):
+
+```bash
+cp -r skills/generate-presentation ~/.claude/skills/
+```
+
+The skill becomes available as a slash command:
 
 ```
 /generate-presentation My startup pitch deck about AI-powered analytics
 ```
 
-Or with a markdown file:
+See the [Claude Code skills docs](https://docs.anthropic.com/en/docs/claude-code/skills) for more details.
 
+---
+
+#### Cursor
+
+Cursor discovers skills through its rules system or via the [cursor-skills](https://github.com/chrisboden/cursor-skills) MCP server.
+
+**Option A — Cursor rules directory** (simplest):
+
+```bash
+cp -r skills/generate-presentation YOUR_PROJECT/.cursor/skills/
+```
+
+Then add a rule file at `.cursor/rules/generate-presentation.mdc`:
+
+```yaml
+---
+description: Generate professional HTML/PDF presentations from topics, URLs, or markdown files
+globs: []
+alwaysApply: false
+---
+
+@skills/generate-presentation/SKILL.md
+```
+
+When you ask Cursor's agent to create a presentation, it will pick up the skill from the rules.
+
+**Option B — cursor-skills MCP server** (if you use [cursor-skills](https://github.com/chrisboden/cursor-skills)):
+
+```bash
+cp -r skills/generate-presentation /path/to/cursor-skills/skills/
+```
+
+The MCP server auto-discovers skills in its `skills/` directory. Ask the agent:
+
+> Use the generate-presentation skill to create a pitch deck about AI analytics
+
+Or import directly from GitHub:
+
+> Please import https://github.com/nhype/presentation-generation-skill
+
+See the [Cursor skills guide](https://design.dev/guides/claude-skills/) for more details.
+
+---
+
+#### OpenClaw
+
+OpenClaw uses the same SKILL.md format. Install the skill to one of these locations:
+
+**Workspace-level** (this agent only):
+
+```bash
+cp -r skills/generate-presentation YOUR_WORKSPACE/skills/
+```
+
+**Global** (all agents on your machine):
+
+```bash
+cp -r skills/generate-presentation ~/.openclaw/skills/
+```
+
+Configure the OpenAI API key for the skill in `~/.openclaw/openclaw.json`:
+
+```json
+{
+  "skills": {
+    "entries": {
+      "generate-presentation": {
+        "enabled": true,
+        "env": {
+          "OPENAI_API_KEY": "sk-your-key-here"
+        }
+      }
+    }
+  }
+}
+```
+
+Then ask your OpenClaw agent:
+
+> Generate a presentation about AI-powered analytics
+
+Or invoke it directly:
+
+> /generate-presentation My startup pitch deck
+
+See the [OpenClaw skills docs](https://docs.openclaw.ai/tools/skills) for more details.
+
+---
+
+## Usage
+
+Tell your AI agent what to present. The skill accepts:
+
+**A topic:**
+```
+/generate-presentation My startup pitch deck about AI-powered analytics
+```
+
+**A markdown file:**
 ```
 /generate-presentation presentation/content.md
 ```
 
-Or with a URL:
-
+**A URL:**
 ```
 /generate-presentation https://example.com/blog-post-to-present
 ```
@@ -112,9 +220,8 @@ your-project/
 │   ├── content.md
 │   ├── slide_1.png
 │   └── images/
-└── .claude/
-    └── skills/
-        └── generate-presentation/
+└── skills/
+    └── generate-presentation/
 ```
 
 If no reference images are provided, the skill uses a clean modern default style.
@@ -155,7 +262,7 @@ This regenerates all slides with your updated content while keeping the same vis
 presentation-generation-skill/
 ├── skills/
 │   └── generate-presentation/
-│       ├── SKILL.md                 # Main skill definition
+│       ├── SKILL.md                 # Main skill definition (cross-platform)
 │       ├── scripts/
 │       │   └── slides_to_pdf.py     # PDF conversion utility
 │       └── templates/
@@ -170,6 +277,16 @@ presentation-generation-skill/
 ├── README.md
 └── LICENSE                          # Apache 2.0
 ```
+
+## Platform Compatibility
+
+| Feature | Claude Code | Cursor | OpenClaw |
+|---------|-------------|--------|----------|
+| Skill format | SKILL.md | SKILL.md | SKILL.md |
+| Slash command | `/generate-presentation` | Agent-driven | `/generate-presentation` |
+| MCP server | `.mcp.json` | `.cursor/mcp.json` | `openclaw.json` |
+| Skill location | `.claude/skills/` | `.cursor/skills/` or `skills/` | `skills/` or `~/.openclaw/skills/` |
+| Auto-discovery | Yes (via description) | Yes (via rules/MCP) | Yes (via description) |
 
 ## Contributing
 

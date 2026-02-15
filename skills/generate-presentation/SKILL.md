@@ -3,6 +3,14 @@ name: generate-presentation
 description: Generate professional HTML and PDF presentations from markdown content, URLs, or topics. Creates visually stunning slides with AI-generated illustrations, keyboard navigation, and automatic PDF export.
 argument-hint: "[topic, URL, or path to .md file]"
 disable-model-invocation: true
+metadata:
+  openclaw:
+    requires:
+      bins:
+        - python3
+        - node
+      env:
+        - OPENAI_API_KEY
 ---
 
 # Generate Presentation
